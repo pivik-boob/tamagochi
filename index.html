@@ -3,20 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Мини-Жасмин Тамагочи: Только интерфейс</title>
+    <title>Мини-Я Тамагочи: Только интерфейс</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
     <style>
         :root {
-            var(--bg-color): #fce4ec;
+            /* Переменные цветов и шрифтов */
+            --bg-color: #fce4ec; 
             --font-pixel: 'VT323', monospace;
             --heart-color: #FF0000;
             --btn-text-color: #000000; 
         }
 
         body {
+            /* Теперь фон - это твоя картинка bg.png */
             background-color: var(--bg-color);
             background-image: url('bg.png'); 
             background-size: cover;
@@ -40,16 +42,23 @@
             padding: 10px;
             box-sizing: border-box;
         }
-
-        #hearts-container {
+        
+        #top-bar {
             position: absolute;
             top: 15%; 
             left: 20%; 
             display: flex;
+            justify-content: flex-start;
+            align-items: center;
             gap: 10px;
+            height: 30px;
             z-index: 2; 
         }
-        
+
+        #hearts-container {
+            display: flex;
+            gap: 10px;
+        }
         .heart {
             width: 25px;
             height: 25px;
@@ -58,6 +67,18 @@
             fill: var(--heart-color);
         }
 
+        #food-bowl {
+            width: 35px;
+            height: 20px;
+            fill: #FF4B4B; 
+        }
+
+        #clean-status {
+            color: #00FF00; 
+            font-size: 24px;
+            margin-left: auto; 
+        }
+        
         #main-character-container {
             position: absolute;
             top: 25%; 
@@ -74,27 +95,27 @@
         #main-character {
             width: 100%;
             height: 100%;
-            background-image: url('base.gif'); /* ТЕПЕРЬ ПО УМОЛЧАНИЮ БАЗОВОЕ СОСТОЯНИЕ */
+            background-image: url('base.gif'); 
             background-size: contain;
             background-repeat: no-repeat;
             background-position: center;
         }
-
-        #action-buttons-container {
+        
+        #action-bar {
             position: absolute;
             bottom: 20%; 
             left: 50%;
             transform: translateX(-50%); 
             display: flex;
-            gap: 20px;
+            gap: 15px; /* Сделал расстояние между кнопками чуть больше */
             z-index: 3; 
         }
         
         .action-btn {
             background-color: white; 
             color: var(--btn-text-color);
-            font-size: 24px; 
-            padding: 10px 20px;
+            font-size: 22px; 
+            padding: 8px 20px;
             border-radius: 8px;
             border: 2px solid #000; 
             box-shadow: 0 4px 0 rgba(0,0,0,0.5); 
@@ -106,24 +127,30 @@
             transform: translateY(2px);
             box-shadow: 0 2px 0 rgba(0,0,0,0.5);
         }
+
     </style>
 </head>
 <body>
 
     <div id="screen-display">
-        <div id="hearts-container">
-            <svg class="heart active" viewBox="0 0 7 6"><path d="M2,0h1v1h1v1h-1v-1h-1v1h-1v1h-1v-1h1v-1h1v-1z"/><path d="M5,0h1v1h1v1h-1v-1h-1v1h-1v1h-1v-1h1v-1h1v-1z"/><path d="M3,2h1v1h-1z" fill="#FFF"/></svg>
-            <svg class="heart active" viewBox="0 0 7 6"><path d="M2,0h1v1h1v1h-1v-1h-1v1h-1v1h-1v-1h1v-1h1v-1z"/><path d="M5,0h1v1h1v1h-1v-1h-1v1h-1v1h-1v-1h1v-1h1v-1z"/><path d="M3,2h1v1h-1z" fill="#FFF"/></svg>
-            <svg class="heart active" viewBox="0 0 7 6"><path d="M2,0h1v1h1v1h-1v-1h-1v1h-1v1h-1v-1h1v-1h1v-1z"/><path d="M5,0h1v1h1v1h-1v-1h-1v1h-1v1h-1v-1h1v-1h1v-1z"/><path d="M3,2h1v1h-1z" fill="#FFF"/></svg>
+        <div id="top-bar">
+            <div id="hearts-container">
+                <svg class="heart active" viewBox="0 0 7 6"><path d="M2,0h1v1h1v1h-1v-1h-1v1h-1v1h-1v-1h1v-1h1v-1z"/><path d="M5,0h1v1h1v1h-1v-1h-1v1h-1v1h-1v-1h1v-1h1v-1z"/><path d="M3,2h1v1h-1z" fill="#FFF"/></svg>
+                <svg class="heart active" viewBox="0 0 7 6"><path d="M2,0h1v1h1v1h-1v-1h-1v1h-1v1h-1v-1h1v-1h1v-1z"/><path d="M5,0h1v1h1v1h-1v-1h-1v1h-1v1h-1v-1h1v-1h1v-1z"/><path d="M3,2h1v1h-1z" fill="#FFF"/></svg>
+                <svg class="heart active" viewBox="0 0 7 6"><path d="M2,0h1v1h1v1h-1v-1h-1v1h-1v1h-1v-1h1v-1h1v-1z"/><path d="M5,0h1v1h1v1h-1v-1h-1v1h-1v1h-1v-1h1v-1h1v-1z"/><path d="M3,2h1v1h-1z" fill="#FFF"/></svg>
+            </div>
+            
+            <svg id="food-bowl" viewBox="0 0 10 5"><path d="M2,0h6v1h1v1h1v3h-10v-3h1v-1h1z"/><path d="M1,2h8v1h-1v-1h-6v1h-1z" fill="#E65A00"/><path d="M2,1h6v1h-6z" fill="#FFFFCC"/></svg>
+            <div id="clean-status">CLEAN</div>
         </div>
         
         <div id="main-character-container">
             <div id="main-character"></div>
         </div>
         
-        <div id="action-buttons-container">
+        <div id="action-bar">
             <div class="action-btn" id="btn-feed">FEED</div>
-            <div class="action-btn" id="btn-play">PLAY</div>
+            <div class="action-btn" id="btn-kiss">KISS</div>
         </div>
     </div>
 
@@ -139,11 +166,9 @@
         function checkState() {
             const timeSinceLastCare = (Date.now() - lastInteractionTime) / 1000;
             
-            // Если забыли про неё (больше 60 секунд) или упали показатели — грустит
             if (timeSinceLastCare > 60 || stats.hunger < 30 || stats.happiness < 40) {
                 character.style.backgroundImage = "url('sad1.gif')";
             } else {
-                // Если всё хорошо — стоит в спокойном базовом состоянии
                 character.style.backgroundImage = "url('base.gif')";
             }
         }
@@ -153,23 +178,15 @@
             stats.hunger = 100;
             stats.happiness += 10;
             lastInteractionTime = Date.now(); 
-            
-            // Показываем эмоцию радости от еды
             character.style.backgroundImage = "url('happy1.gif')"; 
-            
-            // Через 3 секунды возвращаем в базовое состояние
             setTimeout(checkState, 3000); 
         });
 
-        // Кнопка PLAY
-        document.getElementById('btn-play').addEventListener('click', () => {
+        // Кнопка KISS
+        document.getElementById('btn-kiss').addEventListener('click', () => {
             stats.happiness = 100;
             lastInteractionTime = Date.now(); 
-            
-            // Показываем эмоцию поцелуя
             character.style.backgroundImage = "url('kiss1.gif')"; 
-            
-            // Через 2.5 секунды возвращаем в базовое состояние
             setTimeout(checkState, 2500); 
         });
 
