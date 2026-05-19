@@ -2,316 +2,330 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Мини-Я Тамагочи: Финальная версия</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Мини-Я Тамагочи</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
     <style>
-        :root {
-            --bg-color: #fce4ec; /* Нежно-розовый фон страницы */
-            --font-pixel: 'VT323', monospace;
-            --heart-color: #FF0000; /* Ярко-красный цвет для сердечек */
-            --btn-text-color: #000000; /* Черный текст для кнопок */
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
-            /* Фон - твое полное изображение bg.png */
-            background-color: var(--bg-color);
-            background-image: url('bg.png'); 
-            background-size: contain; /* Картинка полностью вписывается в экран */
+            background-color: #fce4ec;
+            background-image: url('bg.png');
+            background-size: contain;
             background-position: center;
             background-repeat: no-repeat;
-            
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100vh;
-            margin: 0;
-            overflow: hidden;
-            font-family: var(--font-pixel);
-            image-rendering: pixelated; /* Сохраняем пиксельность для всего */
-        }
-
-        /* --- ОСНОВНОЙ КОНТЕЙНЕР ЭКРАНА (наложен поверх фона) --- */
-        
-        #screen-display {
             width: 100vw;
             height: 100vh;
-            position: relative; /* Чтобы элементы внутри позиционировались относительно экрана */
-            box-sizing: border-box;
-            pointer-events: none; /* Пропускаем клики сквозь контейнер, чтобы кнопки нажимались */
+            overflow: hidden;
+            font-family: 'VT323', monospace;
+            image-rendering: pixelated;
         }
 
-        /* --- ПОКАЗАТЕЛИ СВЕРХУ (Сердца, CLEAN) --- */
-        
+        /*
+         * Весь UI накладывается на bg.png через абсолютное позиционирование.
+         * Мы создаём «рамку экрана» — контейнер с теми же пропорциями, что и bg.png,
+         * чтобы проценты внутри совпадали с реальными координатами на картинке.
+         *
+         * bg.png у тебя примерно 9:16 (портретная ориентация телефона).
+         * Если твой bg.png другого размера — подправь aspect-ratio ниже.
+         */
+
+        #game-frame {
+            position: relative;
+            /* Занимаем максимум экрана, сохраняя пропорции bg.png */
+            width: min(100vw, calc(100vh * 9 / 16));
+            height: min(100vh, calc(100vw * 16 / 9));
+            /* Координаты экрана устройства (зелёная область) внутри bg.png.
+               Замеряй по своей картинке и подправляй эти 4 переменные. */
+            --screen-top: 24%;     /* верхний край зелёного экрана */
+            --screen-left: 22%;    /* левый край */
+            --screen-width: 56%;   /* ширина экрана */
+            --screen-height: 57%;  /* высота экрана */
+        }
+
+        /* Невидимый слой, повторяющий зону экрана устройства */
+        #screen-area {
+            position: absolute;
+            top: var(--screen-top);
+            left: var(--screen-left);
+            width: var(--screen-width);
+            height: var(--screen-height);
+            /* outline: 2px dashed red; */ /* раскомментируй для отладки границ */
+        }
+
+        /* ── Верхняя панель: сердечки + CLEAN ── */
         #top-bar {
             position: absolute;
-            top: 25%; /* Настройка положения по вертикали */
-            left: 30%; /* Настройка положения по горизонтали */
+            top: 4%;
+            left: 4%;
+            right: 4%;
             display: flex;
-            justify-content: flex-start;
+            justify-content: space-between;
             align-items: center;
-            gap: 10px;
-            height: 30px;
-            z-index: 2;
-            pointer-events: auto; /* Включаем клики для этой области */
         }
 
         #hearts-container {
             display: flex;
-            gap: 5px;
+            gap: 4px;
         }
-        
-        /* Монолитные красные сердечки */
+
         .heart {
-            width: 25px;
-            height: 25px;
-            fill: var(--heart-color);
+            width: 22px;
+            height: 22px;
+            fill: #FF0000;
+            filter: drop-shadow(0 1px 0 #000);
         }
 
-        /* Текст CLEAN */
+        .heart.empty {
+            fill: #555;
+            opacity: 0.4;
+        }
+
         #clean-status {
-            color: #00FF00; /* Ярко-зеленый текст */
-            font-size: 24px;
-            position: absolute;
-            right: -150%; /* Сдвигаем CLEAN вправо относительно сердечек */
-        }
-        
-        /* --- ТВОЙ ПЕРСОНАЖ (включая облачко) --- */
-        
-        #main-character-container {
-            position: absolute;
-            top: 30%; /* Центр рисованного экрана */
-            left: 50%;
-            transform: translateX(-50%); /* Центрируем по горизонтали */
-            width: 150px;
-            height: 250px;
-            z-index: 1; /* Персонаж за кнопочками */
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 0;
-            box-sizing: border-box;
-            pointer-events: auto;
+            color: #00FF00;
+            font-size: 22px;
+            text-shadow: 1px 1px 0 #003300;
         }
 
-        /* Облачко с текстом */
+        /* ── Облачко с текстом ── */
         #speech-bubble {
             position: absolute;
-            top: -30px; /* Чуть выше головы */
+            top: 2%;
+            left: 50%;
+            transform: translateX(-50%);
             background: white;
             border: 2px solid black;
             border-radius: 10px;
-            padding: 5px 12px;
-            font-size: 18px;
+            padding: 4px 14px;
+            font-size: 16px;
             color: black;
             white-space: nowrap;
-            opacity: 0; /* Скрыто по умолчанию */
+            opacity: 0;
             transition: opacity 0.3s ease;
-            box-shadow: 0 4px 0 rgba(0,0,0,0.2);
+            box-shadow: 0 3px 0 rgba(0,0,0,0.25);
             pointer-events: none;
             z-index: 10;
         }
-        
-        /* Хвостик облачка */
+
         #speech-bubble::after {
             content: '';
             position: absolute;
-            bottom: -8px;
+            bottom: -9px;
             left: 50%;
             transform: translateX(-50%);
-            border-width: 8px 8px 0;
+            border-width: 9px 7px 0;
             border-style: solid;
-            border-color: black transparent transparent transparent;
+            border-color: black transparent transparent;
         }
-        
+
+        /* ── Персонаж ── */
+        #main-character-container {
+            position: absolute;
+            /* Верхняя треть экрана → нижняя часть */
+            top: 14%;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 55%;      /* ширина гифки относительно экрана */
+            height: 62%;     /* высота гифки */
+            display: flex;
+            justify-content: center;
+            align-items: flex-end;
+        }
+
         #main-character {
             width: 100%;
             height: 100%;
-            background-image: url('base.gif'); /* ТЕПЕРЬ С ПРОЗРАЧНЫМ ФОНОМ */
+            background-image: url('base.gif');
             background-size: contain;
             background-repeat: no-repeat;
-            background-position: center;
-        }
-        
-        /* --- КНОПКИ ДЕЙСТВИЙ (FEED, KISS) --- */
-        
-        #action-bar {
-            position: absolute;
-            top: 65%; /* На нарисованные кнопки */
-            left: 50%;
-            transform: translateX(-50%); /* Центрируем */
-            display: flex;
-            gap: 15px; /* Расстояние между кнопками */
-            z-index: 3;
-            pointer-events: auto; /* Включаем клики для кнопок */
-        }
-        
-        .action-btn {
-            background-color: white; /* Белый фон для кнопок */
-            color: var(--btn-text-color);
-            font-size: 22px; /* Пиксельный шрифт */
-            padding: 8px 20px;
-            border-radius: 8px;
-            border: 2px solid #000; /* Черный пиксельный контур */
-            box-shadow: 0 4px 0 rgba(0,0,0,0.5); /* Объемная тень */
-            cursor: pointer;
-            transition: transform 0.1s, box-shadow 0.1s;
-        }
-        
-        .action-btn:active {
-            transform: translateY(2px);
-            box-shadow: 0 2px 0 rgba(0,0,0,0.5);
+            background-position: center bottom;
+            image-rendering: pixelated;
         }
 
+        /* ── Кнопки FEED / KISS ── */
+        #action-bar {
+            position: absolute;
+            bottom: 4%;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 12px;
+            z-index: 5;
+        }
+
+        .action-btn {
+            background-color: white;
+            color: #000;
+            font-family: 'VT323', monospace;
+            font-size: 20px;
+            padding: 6px 18px;
+            border-radius: 6px;
+            border: 2px solid #000;
+            box-shadow: 0 4px 0 rgba(0,0,0,0.45);
+            cursor: pointer;
+            user-select: none;
+            transition: transform 0.1s, box-shadow 0.1s;
+        }
+
+        .action-btn:active {
+            transform: translateY(3px);
+            box-shadow: 0 1px 0 rgba(0,0,0,0.45);
+        }
     </style>
 </head>
 <body>
 
-    <div id="screen-display">
+<div id="game-frame">
+    <div id="screen-area">
+
+        <!-- Верхняя панель -->
         <div id="top-bar">
             <div id="hearts-container">
                 <svg class="heart" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
                 <svg class="heart" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
                 <svg class="heart" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+                <svg class="heart empty" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+                <svg class="heart empty" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
             </div>
-            
             <div id="clean-status">CLEAN</div>
         </div>
-        
+
+        <!-- Облачко -->
+        <div id="speech-bubble">Привет!</div>
+
+        <!-- Персонаж -->
         <div id="main-character-container">
-            <div id="speech-bubble">Привет!</div>
             <div id="main-character"></div>
         </div>
-        
+
+        <!-- Кнопки -->
         <div id="action-bar">
             <div class="action-btn" id="btn-feed">FEED</div>
             <div class="action-btn" id="btn-kiss">KISS</div>
         </div>
+
     </div>
+</div>
 
-    <script>
-        const tg = window.Telegram?.WebApp;
-        if (tg) {
-            tg.expand();
-            tg.ready();
+<script>
+    const tg = window.Telegram?.WebApp;
+    if (tg) { tg.expand(); tg.ready(); }
+
+    const character   = document.getElementById('main-character');
+    const speechBubble = document.getElementById('speech-bubble');
+    const heartsEl    = document.getElementById('hearts-container');
+    const cleanEl     = document.getElementById('clean-status');
+
+    let stats = { hunger: 80, happiness: 80 };
+    let lastInteractionTime = Date.now();
+    let speechTimeout;
+
+    const randomPhrases = [
+        "Скучаю по тебе!",
+        "Хочу кушать...",
+        "Обними меня!",
+        "Люблю тебя ❤️",
+        "Побудь со мной?"
+    ];
+
+    /* ── Облачко ── */
+    function speak(text, duration = 3000) {
+        clearTimeout(speechTimeout);
+        speechBubble.innerText = text;
+        speechBubble.style.opacity = '1';
+        speechTimeout = setTimeout(() => { speechBubble.style.opacity = '0'; }, duration);
+    }
+
+    /* ── Сердечки (0–5) ── */
+    function updateHearts(value) {
+        const filled = Math.round((value / 100) * 5);
+        const hearts = heartsEl.querySelectorAll('.heart');
+        hearts.forEach((h, i) => {
+            h.classList.toggle('empty', i >= filled);
+        });
+    }
+
+    /* ── Состояние персонажа ── */
+    function checkState() {
+        const now = Date.now();
+        const elapsed = (now - lastInteractionTime) / 1000; // секунд
+
+        if (elapsed > 10) {
+            const cycles = Math.floor(elapsed / 10);
+            stats.hunger    = Math.max(0, stats.hunger    - cycles * 2);
+            stats.happiness = Math.max(0, stats.happiness - cycles * 1);
         }
 
-        const character = document.getElementById('main-character');
-        const speechBubble = document.getElementById('speech-bubble');
-        
-        let stats = { hunger: 50, happiness: 50 };
-        let lastInteractionTime = Date.now(); 
-        let speechTimeout;
+        updateHearts(stats.happiness);
+        cleanEl.style.color = stats.hunger > 30 ? '#00FF00' : '#FF4444';
 
-        // Фразы, которые она говорит сама по себе
-        const randomPhrases = [
-            "Жасмин, обними меня!",
-            "Хочу тунец в собственном соку!",
-            "Я скучала..."
-        ];
+        const isSad = elapsed > 120 || stats.hunger < 30 || stats.happiness < 40;
+        character.style.backgroundImage = isSad ? "url('sad.gif')" : "url('base.gif')";
+    }
 
-        // Функция показа текста в облачке
-        function speak(text, duration = 3000) {
-            clearTimeout(speechTimeout);
-            speechBubble.innerText = text;
-            speechBubble.style.opacity = '1';
-            speechTimeout = setTimeout(() => {
-                speechBubble.style.opacity = '0';
-            }, duration);
+    /* ── Сохранение / загрузка ── */
+    function saveData() {
+        const data = JSON.stringify({ hunger: stats.hunger, happiness: stats.happiness, lastInteractionTime });
+        if (tg?.CloudStorage) {
+            tg.CloudStorage.setItem('tamagotchi_data', data, err => { if (err) console.error(err); });
+        } else {
+            localStorage.setItem('tamagotchi_data', data);
         }
+    }
 
-        // Сохранение в облако Telegram
-        function saveData() {
-            const dataString = JSON.stringify({ hunger: stats.hunger, happiness: stats.happiness, lastInteractionTime });
-            if (tg && tg.CloudStorage) {
-                tg.CloudStorage.setItem('tamagotchi_data', dataString, (err, success) => {
-                    if (err) console.error("Ошибка сохранения в облако");
-                });
-            } else {
-                localStorage.setItem('tamagotchi_data', dataString);
-            }
+    function loadData(cb) {
+        if (tg?.CloudStorage) {
+            tg.CloudStorage.getItem('tamagotchi_data', (err, val) => cb(!err && val ? JSON.parse(val) : null));
+        } else {
+            const val = localStorage.getItem('tamagotchi_data');
+            cb(val ? JSON.parse(val) : null);
         }
+    }
 
-        // Загрузка из облака Telegram
-        function loadData(callback) {
-            if (tg && tg.CloudStorage) {
-                tg.CloudStorage.getItem('tamagotchi_data', (err, value) => {
-                    if (!err && value) callback(JSON.parse(value));
-                    else callback(null);
-                });
-            } else {
-                const value = localStorage.getItem('tamagotchi_data');
-                callback(value ? JSON.parse(value) : null);
-            }
+    /* ── Инициализация ── */
+    loadData(saved => {
+        if (saved) {
+            stats.hunger            = saved.hunger;
+            stats.happiness         = saved.happiness;
+            lastInteractionTime     = saved.lastInteractionTime;
+            speak('С возвращением! 💕');
+        } else {
+            speak('Привет! Ухаживай за мной! 💕');
         }
+        checkState();
 
-        function checkState() {
-            const now = Date.now();
-            const timeSinceLastCare = (now - lastInteractionTime) / 1000;
-            
-            if (timeSinceLastCare > 10) {
-                const cycles = Math.floor(timeSinceLastCare / 10);
-                stats.hunger = Math.max(0, stats.hunger - (cycles * 2)); 
-                stats.happiness = Math.max(0, stats.happiness - (cycles * 1));
-            }
-
-            if (timeSinceLastCare > 120 || stats.hunger < 30 || stats.happiness < 40) {
-                character.style.backgroundImage = "url('sad.gif')";
-            } else {
-                character.style.backgroundImage = "url('base.gif')";
-            }
-        }
-
-        // --- ИНИЦИАЛИЗАЦИЯ ИГРЫ ---
-        loadData((savedData) => {
-            if (savedData) {
-                stats.hunger = savedData.hunger;
-                stats.happiness = savedData.happiness;
-                lastInteractionTime = savedData.lastInteractionTime;
-                speak("С возвращением!");
-            } else {
-                speak("Привет! Я твоя мини-копия!");
-            }
-            
+        setInterval(() => {
             checkState();
-
-            // Запускаем игровой цикл
-            setInterval(() => {
-                checkState();
-                saveData(); // Сохраняем каждые 10 секунд
-                
-                // С вероятностью 15% она может сказать случайную фразу, если не грустит
-                if (Math.random() < 0.15 && character.style.backgroundImage.includes('base.gif')) {
-                    const randomText = randomPhrases[Math.floor(Math.random() * randomPhrases.length)];
-                    speak(randomText);
-                }
-            }, 10000);
-        });
-
-        // Кнопка FEED
-        document.getElementById('btn-feed').addEventListener('click', () => {
-            stats.hunger = 100;
-            stats.happiness = Math.min(100, stats.happiness + 10);
-            lastInteractionTime = Date.now(); 
-            character.style.backgroundImage = "url('happy.gif')"; 
-            speak("Ням-ням! Вкусно! 🐟");
             saveData();
-            setTimeout(checkState, 3000); 
-        });
+            if (Math.random() < 0.15 && !character.style.backgroundImage.includes('sad')) {
+                speak(randomPhrases[Math.floor(Math.random() * randomPhrases.length)]);
+            }
+        }, 10000);
+    });
 
-        // Кнопка KISS
-        document.getElementById('btn-kiss').addEventListener('click', () => {
-            stats.happiness = 100;
-            lastInteractionTime = Date.now(); 
-            character.style.backgroundImage = "url('kiss.gif')"; 
-            speak("Люблю тебя! ❤️");
-            saveData();
-            setTimeout(checkState, 2500); 
-        });
+    /* ── Кнопки ── */
+    document.getElementById('btn-feed').addEventListener('click', () => {
+        stats.hunger    = 100;
+        stats.happiness = Math.min(100, stats.happiness + 10);
+        lastInteractionTime = Date.now();
+        character.style.backgroundImage = "url('happy.gif')";
+        speak('Ням-ням! Вкусно! 🍓');
+        saveData();
+        setTimeout(checkState, 3000);
+    });
 
-    </script>
+    document.getElementById('btn-kiss').addEventListener('click', () => {
+        stats.happiness = 100;
+        lastInteractionTime = Date.now();
+        character.style.backgroundImage = "url('kiss.gif')";
+        speak('Люблю тебя! ❤️');
+        saveData();
+        setTimeout(checkState, 2500);
+    });
+</script>
 </body>
 </html>
