@@ -3,22 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Мини-Я Тамагочи: Только интерфейс</title>
+    <title>Мини-Я Тамагочи: Облачная версия</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
     <style>
         :root {
-            /* Переменные цветов и шрифтов */
-            --bg-color: #fce4ec; 
+            var(--bg-color): #fce4ec; 
             --font-pixel: 'VT323', monospace;
-            --heart-color: #FF0000;
             --btn-text-color: #000000; 
         }
 
         body {
-            /* Теперь фон - это твоя картинка bg.png */
             background-color: var(--bg-color);
             background-image: url('bg.png'); 
             background-size: cover;
@@ -57,14 +54,14 @@
 
         #hearts-container {
             display: flex;
-            gap: 10px;
+            gap: 5px;
         }
+        
+        /* Новые, плотные красные сердечки */
         .heart {
             width: 25px;
             height: 25px;
-        }
-        .heart.active {
-            fill: var(--heart-color);
+            fill: #FF0000; /* Ярко-красный цвет */
         }
 
         #food-bowl {
@@ -91,6 +88,36 @@
             justify-content: center;
             align-items: center;
         }
+
+        /* Облачко с текстом */
+        #speech-bubble {
+            position: absolute;
+            top: -30px; 
+            background: white;
+            border: 2px solid black;
+            border-radius: 10px;
+            padding: 5px 12px;
+            font-size: 18px;
+            color: black;
+            white-space: nowrap;
+            opacity: 0; /* Скрыто по умолчанию */
+            transition: opacity 0.3s ease;
+            box-shadow: 0 4px 0 rgba(0,0,0,0.2);
+            pointer-events: none;
+            z-index: 10;
+        }
+        
+        /* Хвостик облачка */
+        #speech-bubble::after {
+            content: '';
+            position: absolute;
+            bottom: -8px;
+            left: 50%;
+            transform: translateX(-50%);
+            border-width: 8px 8px 0;
+            border-style: solid;
+            border-color: black transparent transparent transparent;
+        }
         
         #main-character {
             width: 100%;
@@ -107,7 +134,7 @@
             left: 50%;
             transform: translateX(-50%); 
             display: flex;
-            gap: 15px; /* Сделал расстояние между кнопками чуть больше */
+            gap: 15px; 
             z-index: 3; 
         }
         
@@ -135,9 +162,9 @@
     <div id="screen-display">
         <div id="top-bar">
             <div id="hearts-container">
-                <svg class="heart active" viewBox="0 0 7 6"><path d="M2,0h1v1h1v1h-1v-1h-1v1h-1v1h-1v-1h1v-1h1v-1z"/><path d="M5,0h1v1h1v1h-1v-1h-1v1h-1v1h-1v-1h1v-1h1v-1z"/><path d="M3,2h1v1h-1z" fill="#FFF"/></svg>
-                <svg class="heart active" viewBox="0 0 7 6"><path d="M2,0h1v1h1v1h-1v-1h-1v1h-1v1h-1v-1h1v-1h1v-1z"/><path d="M5,0h1v1h1v1h-1v-1h-1v1h-1v1h-1v-1h1v-1h1v-1z"/><path d="M3,2h1v1h-1z" fill="#FFF"/></svg>
-                <svg class="heart active" viewBox="0 0 7 6"><path d="M2,0h1v1h1v1h-1v-1h-1v1h-1v1h-1v-1h1v-1h1v-1z"/><path d="M5,0h1v1h1v1h-1v-1h-1v1h-1v1h-1v-1h1v-1h1v-1z"/><path d="M3,2h1v1h-1z" fill="#FFF"/></svg>
+                <svg class="heart" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+                <svg class="heart" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+                <svg class="heart" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
             </div>
             
             <svg id="food-bowl" viewBox="0 0 10 5"><path d="M2,0h6v1h1v1h1v3h-10v-3h1v-1h1z"/><path d="M1,2h8v1h-1v-1h-6v1h-1z" fill="#E65A00"/><path d="M2,1h6v1h-6z" fill="#FFFFCC"/></svg>
@@ -145,6 +172,7 @@
         </div>
         
         <div id="main-character-container">
+            <div id="speech-bubble">Привет!</div>
             <div id="main-character"></div>
         </div>
         
@@ -155,30 +183,115 @@
     </div>
 
     <script>
-        if (window.Telegram && window.Telegram.WebApp) {
-            window.Telegram.WebApp.expand();
+        const tg = window.Telegram?.WebApp;
+        if (tg) {
+            tg.expand();
+            tg.ready();
         }
 
         const character = document.getElementById('main-character');
+        const speechBubble = document.getElementById('speech-bubble');
+        
         let stats = { hunger: 50, happiness: 50 };
         let lastInteractionTime = Date.now(); 
+        let speechTimeout;
+
+        // Фразы, которые она говорит сама по себе
+        const randomPhrases = [
+            "Жасмин, обними меня!",
+            "Хочу тунец в собственном соку!",
+            "Пойдем писать код?",
+            "Как дела?",
+            "Я скучала..."
+        ];
+
+        // Функция показа текста в облачке
+        function speak(text, duration = 3000) {
+            clearTimeout(speechTimeout);
+            speechBubble.innerText = text;
+            speechBubble.style.opacity = '1';
+            speechTimeout = setTimeout(() => {
+                speechBubble.style.opacity = '0';
+            }, duration);
+        }
+
+        // Сохранение в облако Telegram (или в память браузера для тестов)
+        function saveData() {
+            const dataString = JSON.stringify({ hunger: stats.hunger, happiness: stats.happiness, lastInteractionTime });
+            if (tg && tg.CloudStorage) {
+                tg.CloudStorage.setItem('tamagotchi_data', dataString, (err, success) => {
+                    if (err) console.error("Ошибка сохранения в облако");
+                });
+            } else {
+                localStorage.setItem('tamagotchi_data', dataString);
+            }
+        }
+
+        // Загрузка из облака Telegram
+        function loadData(callback) {
+            if (tg && tg.CloudStorage) {
+                tg.CloudStorage.getItem('tamagotchi_data', (err, value) => {
+                    if (!err && value) callback(JSON.parse(value));
+                    else callback(null);
+                });
+            } else {
+                const value = localStorage.getItem('tamagotchi_data');
+                callback(value ? JSON.parse(value) : null);
+            }
+        }
 
         function checkState() {
-            const timeSinceLastCare = (Date.now() - lastInteractionTime) / 1000;
+            const now = Date.now();
+            const timeSinceLastCare = (now - lastInteractionTime) / 1000;
             
-            if (timeSinceLastCare > 60 || stats.hunger < 30 || stats.happiness < 40) {
+            // Если прошло время, высчитываем падение статов
+            if (timeSinceLastCare > 10) {
+                const cycles = Math.floor(timeSinceLastCare / 10);
+                stats.hunger = Math.max(0, stats.hunger - (cycles * 2)); // Медленнее падает для облака
+                stats.happiness = Math.max(0, stats.happiness - (cycles * 1));
+            }
+
+            if (timeSinceLastCare > 120 || stats.hunger < 30 || stats.happiness < 40) {
                 character.style.backgroundImage = "url('sad1.gif')";
             } else {
                 character.style.backgroundImage = "url('base.gif')";
             }
         }
 
+        // --- ИНИЦИАЛИЗАЦИЯ ИГРЫ ---
+        loadData((savedData) => {
+            if (savedData) {
+                stats.hunger = savedData.hunger;
+                stats.happiness = savedData.happiness;
+                lastInteractionTime = savedData.lastInteractionTime;
+                speak("С возвращением!");
+            } else {
+                speak("Привет! Я ждала тебя!");
+            }
+            
+            checkState();
+
+            // Запускаем игровой цикл
+            setInterval(() => {
+                checkState();
+                saveData(); // Сохраняем каждые 10 секунд
+                
+                // С вероятностью 15% она может сказать случайную фразу, если не грустит
+                if (Math.random() < 0.15 && character.style.backgroundImage.includes('base.gif')) {
+                    const randomText = randomPhrases[Math.floor(Math.random() * randomPhrases.length)];
+                    speak(randomText);
+                }
+            }, 10000);
+        });
+
         // Кнопка FEED
         document.getElementById('btn-feed').addEventListener('click', () => {
             stats.hunger = 100;
-            stats.happiness += 10;
+            stats.happiness = Math.min(100, stats.happiness + 10);
             lastInteractionTime = Date.now(); 
             character.style.backgroundImage = "url('happy1.gif')"; 
+            speak("Ням-ням! Вкусно! 🐟");
+            saveData();
             setTimeout(checkState, 3000); 
         });
 
@@ -187,15 +300,10 @@
             stats.happiness = 100;
             lastInteractionTime = Date.now(); 
             character.style.backgroundImage = "url('kiss1.gif')"; 
+            speak("Люблю тебя! ❤️");
+            saveData();
             setTimeout(checkState, 2500); 
         });
-
-        // Таймер жизни
-        setInterval(() => {
-            stats.hunger = Math.max(0, stats.hunger - 10);
-            stats.happiness = Math.max(0, stats.happiness - 5);
-            checkState(); 
-        }, 10000);
 
     </script>
 </body>
