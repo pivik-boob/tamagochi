@@ -25,36 +25,22 @@
             image-rendering: pixelated;
         }
 
-        /*
-         * Весь UI накладывается на bg.png через абсолютное позиционирование.
-         * Мы создаём «рамку экрана» — контейнер с теми же пропорциями, что и bg.png,
-         * чтобы проценты внутри совпадали с реальными координатами на картинке.
-         *
-         * bg.png у тебя примерно 9:16 (портретная ориентация телефона).
-         * Если твой bg.png другого размера — подправь aspect-ratio ниже.
-         */
-
         #game-frame {
             position: relative;
-            /* Занимаем максимум экрана, сохраняя пропорции bg.png */
             width: min(100vw, calc(100vh * 9 / 16));
             height: min(100vh, calc(100vw * 16 / 9));
-            /* Координаты экрана устройства (зелёная область) внутри bg.png.
-               Замеряй по своей картинке и подправляй эти 4 переменные. */
-            --screen-top: 24%;     /* верхний край зелёного экрана */
-            --screen-left: 22%;    /* левый край */
-            --screen-width: 56%;   /* ширина экрана */
-            --screen-height: 57%;  /* высота экрана */
+            --screen-top: 24%;
+            --screen-left: 22%;
+            --screen-width: 56%;
+            --screen-height: 57%;
         }
 
-        /* Невидимый слой, повторяющий зону экрана устройства */
         #screen-area {
             position: absolute;
             top: var(--screen-top);
             left: var(--screen-left);
             width: var(--screen-width);
             height: var(--screen-height);
-            /* outline: 2px dashed red; */ /* раскомментируй для отладки границ */
         }
 
         /* ── Верхняя панель: сердечки + CLEAN ── */
@@ -125,12 +111,13 @@
         /* ── Персонаж ── */
         #main-character-container {
             position: absolute;
-            /* Верхняя треть экрана → нижняя часть */
-            top: 14%;
+            /* Moved up slightly to accommodate the larger size */
+            top: 10%; 
             left: 50%;
             transform: translateX(-50%);
-            width: 55%;      /* ширина гифки относительно экрана */
-            height: 62%;     /* высота гифки */
+            /* Increased dimensions to make the GIF larger */
+            width: 85%;      
+            height: 75%;     
             display: flex;
             justify-content: center;
             align-items: flex-end;
@@ -215,6 +202,13 @@
     const tg = window.Telegram?.WebApp;
     if (tg) { tg.expand(); tg.ready(); }
 
+    // Preload GIFs so they display instantly on click without network delay
+    const preloadImages = ['happy.gif', 'kiss.gif', 'sad.gif'];
+    preloadImages.forEach(src => {
+        const img = new Image();
+        img.src = src;
+    });
+
     const character   = document.getElementById('main-character');
     const speechBubble = document.getElementById('speech-bubble');
     const heartsEl    = document.getElementById('hearts-container');
@@ -223,6 +217,10 @@
     let stats = { hunger: 80, happiness: 80 };
     let lastInteractionTime = Date.now();
     let speechTimeout;
+    
+    // Animation locks to prevent setInterval from overwriting GIFs
+    let actionTimeout;
+    let isAnimating = false;
 
     const randomPhrases = [
         "Скучаю по тебе!",
@@ -252,7 +250,7 @@
     /* ── Состояние персонажа ── */
     function checkState() {
         const now = Date.now();
-        const elapsed = (now - lastInteractionTime) / 1000; // секунд
+        const elapsed = (now - lastInteractionTime) / 1000;
 
         if (elapsed > 10) {
             const cycles = Math.floor(elapsed / 10);
@@ -263,8 +261,11 @@
         updateHearts(stats.happiness);
         cleanEl.style.color = stats.hunger > 30 ? '#00FF00' : '#FF4444';
 
-        const isSad = elapsed > 120 || stats.hunger < 30 || stats.happiness < 40;
-        character.style.backgroundImage = isSad ? "url('sad.gif')" : "url('base.gif')";
+        // Only update the background image if an animation isn't currently playing
+        if (!isAnimating) {
+            const isSad = elapsed > 120 || stats.hunger < 30 || stats.happiness < 40;
+            character.style.backgroundImage = isSad ? "url('sad.gif')" : "url('base.gif')";
+        }
     }
 
     /* ── Сохранение / загрузка ── */
@@ -312,19 +313,33 @@
         stats.hunger    = 100;
         stats.happiness = Math.min(100, stats.happiness + 10);
         lastInteractionTime = Date.now();
+        
+        isAnimating = true;
         character.style.backgroundImage = "url('happy.gif')";
         speak('Ням-ням! Вкусно! 🍓');
         saveData();
-        setTimeout(checkState, 3000);
+        
+        clearTimeout(actionTimeout);
+        actionTimeout = setTimeout(() => {
+            isAnimating = false;
+            checkState();
+        }, 3000);
     });
 
     document.getElementById('btn-kiss').addEventListener('click', () => {
         stats.happiness = 100;
         lastInteractionTime = Date.now();
+        
+        isAnimating = true;
         character.style.backgroundImage = "url('kiss.gif')";
         speak('Люблю тебя! ❤️');
         saveData();
-        setTimeout(checkState, 2500);
+        
+        clearTimeout(actionTimeout);
+        actionTimeout = setTimeout(() => {
+            isAnimating = false;
+            checkState();
+        }, 2500);
     });
 </script>
 </body>
