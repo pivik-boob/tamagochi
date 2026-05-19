@@ -3,25 +3,28 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Мини-Я Тамагочи: Облачная версия</title>
+    <title>Мини-Я Тамагочи: Исправленная версия</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
     <style>
         :root {
-            var(--bg-color): #fce4ec; 
+            /* Переменные цветов и шрифтов */
+            --bg-color: #fce4ec; /* Розовый фон страницы */
             --font-pixel: 'VT323', monospace;
+            --heart-color: #FF0000;
             --btn-text-color: #000000; 
+            
+            /* Цвета корпуса и рамки */
+            --device-body-color: #FF7000;
+            --device-body-shadow: #E65A00;
+            --screen-bezel: #FFD300;
         }
 
         body {
+            /* Убрали фон с body, он теперь внутри тамагочи */
             background-color: var(--bg-color);
-            background-image: url('bg.png'); 
-            background-size: cover;
-            background-position: center;
-            background-repeat: no-repeat;
-            
             display: flex;
             justify-content: center;
             align-items: center;
@@ -29,27 +32,95 @@
             margin: 0;
             overflow: hidden;
             font-family: var(--font-pixel);
-            image-rendering: pixelated; 
+            image-rendering: pixelated; /* Сохраняем пиксельность для всего */
         }
+
+        /* --- ВОССТАНАВЛИВАЕМ ФИЗИЧЕСКИЙ КОРПУС ТАМАГОЧИ --- */
+        
+        #tamagotchi-device {
+            width: 450px;
+            height: 600px;
+            background: linear-gradient(135deg, var(--device-body-color), var(--device-body-shadow));
+            border-radius: 50% / 30%; /* Овальная форма */
+            border: 15px solid var(--device-body-shadow);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.5);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            padding: 30px;
+            box-sizing: border-box;
+            position: relative;
+        }
+
+        /* Физические кнопки (неинтерактивные) */
+        #physical-buttons {
+            position: absolute;
+            bottom: 30px;
+            display: flex;
+            gap: 20px;
+        }
+        .physical-btn {
+            width: 60px;
+            height: 60px;
+            background: radial-gradient(circle, var(--device-body-shadow) 0%, rgba(0,0,0,0.1) 70%, rgba(0,0,0,0.3) 100%);
+            border-radius: 50%;
+            border: 6px solid var(--device-body-shadow);
+            box-shadow: inset 0 4px 6px rgba(0,0,0,0.3);
+            position: relative;
+        }
+        .physical-btn::after { /* Блик */
+            content: '';
+            position: absolute;
+            top: 10%; left: 10%; width: 80%; height: 80%;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+        }
+
+        /* Желтая рамка экрана */
+        #screen-bezel {
+            width: 100%;
+            height: 400px;
+            background-color: var(--screen-bezel);
+            border-radius: 20px;
+            border: 15px solid var(--device-body-shadow);
+            padding: 20px;
+            box-sizing: border-box;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* --- ВНУТРЕННИЙ ЭКРАН ДИСПЛЕЯ --- */
         
         #screen-display {
             width: 100%;
             height: 100%;
+            border-radius: 5px;
             position: relative; 
             padding: 10px;
             box-sizing: border-box;
+            border: 2px solid #000; /* Четкий пиксельный контур экрана */
+            
+            /* ТЕПЕРЬ ФОН ЗДЕСЬ! */
+            background-image: url('bg.png'); 
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
         }
+        
+        /* --- ПОКАЗАТЕЛИ СВЕРХУ (Сердца, Миска, CLEAN) --- */
         
         #top-bar {
             position: absolute;
-            top: 15%; 
-            left: 20%; 
+            top: 10%; /* Сдвигаем вниз от верхнего края */
+            left: 15%; /* Сдвигаем от левого края */
             display: flex;
             justify-content: flex-start;
             align-items: center;
             gap: 10px;
             height: 30px;
-            z-index: 2; 
+            z-index: 2; /* Чтобы были поверх фона */
         }
 
         #hearts-container {
@@ -57,42 +128,46 @@
             gap: 5px;
         }
         
-        /* Новые, плотные красные сердечки */
+        /* Монолитные красные сердечки */
         .heart {
             width: 25px;
             height: 25px;
-            fill: #FF0000; /* Ярко-красный цвет */
+            fill: #FF0000;
         }
 
-        #food-bowl {
-            width: 35px;
-            height: 20px;
-            fill: #FF4B4B; 
-        }
-
+        /* Текст CLEAN */
         #clean-status {
-            color: #00FF00; 
+            color: #00FF00; /* Ярко-зеленый текст */
             font-size: 24px;
-            margin-left: auto; 
+            margin-left: auto; /* Сдвигаем CLEAN вправо */
         }
+        
+        /* --- ТВОЙ ПЕРСОНАЖ --- */
         
         #main-character-container {
             position: absolute;
-            top: 25%; 
+            top: 25%; /* Чуть ниже сердечек */
             left: 50%;
-            transform: translateX(-50%); 
-            width: 150px;
-            height: 250px;
-            z-index: 1; 
+            transform: translateX(-50%); /* Центрируем */
+            
+            /* НОВЫЙ РАЗМЕР КОНТЕЙНЕРА, ЧТОБЫ ВПИСАТЬСЯ ЛУЧШЕ */
+            width: 120px; 
+            height: 200px;
+            
+            z-index: 1; /* Персонаж за кнопочками */
             display: flex;
             justify-content: center;
             align-items: center;
+            
+            /* УБИРАЕМ АБСОЛЮТНОЕ ПОЗИЦИОНИРОВАНИЕ И ПАДИНГИ ВНУТРИ, ЧТОБЫ ГИФКА ЛЕГЛА РОВНО */
+            padding: 0;
+            box-sizing: border-box;
         }
-
+        
         /* Облачко с текстом */
         #speech-bubble {
             position: absolute;
-            top: -30px; 
+            top: -40px; /* Чуть выше */
             background: white;
             border: 2px solid black;
             border-radius: 10px;
@@ -107,45 +182,35 @@
             z-index: 10;
         }
         
-        /* Хвостик облачка */
-        #speech-bubble::after {
-            content: '';
-            position: absolute;
-            bottom: -8px;
-            left: 50%;
-            transform: translateX(-50%);
-            border-width: 8px 8px 0;
-            border-style: solid;
-            border-color: black transparent transparent transparent;
-        }
-        
         #main-character {
             width: 100%;
             height: 100%;
-            background-image: url('base.gif'); 
+            background-image: url('base.gif'); /* Базовая гифка */
             background-size: contain;
             background-repeat: no-repeat;
             background-position: center;
         }
         
+        /* --- КНОПКИ ДЕЙСТВИЙ (FEED, KISS) --- */
+        
         #action-bar {
             position: absolute;
-            bottom: 20%; 
+            bottom: 10%; /* Сдвигаем вверх от нижнего края */
             left: 50%;
-            transform: translateX(-50%); 
+            transform: translateX(-50%); /* Центрируем */
             display: flex;
-            gap: 15px; 
-            z-index: 3; 
+            gap: 15px; /* Расстояние между кнопками */
+            z-index: 3; /* Самый верхний слой, чтобы можно было нажать */
         }
         
         .action-btn {
-            background-color: white; 
+            background-color: white; /* Белый фон для кнопок */
             color: var(--btn-text-color);
             font-size: 22px; 
             padding: 8px 20px;
             border-radius: 8px;
-            border: 2px solid #000; 
-            box-shadow: 0 4px 0 rgba(0,0,0,0.5); 
+            border: 2px solid #000; /* Черный пиксельный контур */
+            box-shadow: 0 4px 0 rgba(0,0,0,0.5); /* Объемная тень */
             cursor: pointer;
             transition: transform 0.1s, box-shadow 0.1s;
         }
@@ -159,26 +224,37 @@
 </head>
 <body>
 
-    <div id="screen-display">
-        <div id="top-bar">
-            <div id="hearts-container">
-                <svg class="heart" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
-                <svg class="heart" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
-                <svg class="heart" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+    <div id="tamagotchi-device">
+        <div id="screen-bezel">
+            <div id="screen-display">
+                
+                <div id="top-bar">
+                    <div id="hearts-container">
+                        <svg class="heart" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+                        <svg class="heart" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+                        <svg class="heart" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+                    </div>
+                    
+                    <div id="clean-status">CLEAN</div>
+                </div>
+                
+                <div id="main-character-container">
+                    <div id="speech-bubble">Привет!</div>
+                    <div id="main-character"></div>
+                </div>
+                
+                <div id="action-bar">
+                    <div class="action-btn" id="btn-feed">FEED</div>
+                    <div class="action-btn" id="btn-kiss">KISS</div>
+                </div>
+                
             </div>
-            
-            <svg id="food-bowl" viewBox="0 0 10 5"><path d="M2,0h6v1h1v1h1v3h-10v-3h1v-1h1z"/><path d="M1,2h8v1h-1v-1h-6v1h-1z" fill="#E65A00"/><path d="M2,1h6v1h-6z" fill="#FFFFCC"/></svg>
-            <div id="clean-status">CLEAN</div>
         </div>
         
-        <div id="main-character-container">
-            <div id="speech-bubble">Привет!</div>
-            <div id="main-character"></div>
-        </div>
-        
-        <div id="action-bar">
-            <div class="action-btn" id="btn-feed">FEED</div>
-            <div class="action-btn" id="btn-kiss">KISS</div>
+        <div id="physical-buttons">
+            <div class="physical-btn"></div>
+            <div class="physical-btn"></div>
+            <div class="physical-btn"></div>
         </div>
     </div>
 
@@ -196,15 +272,6 @@
         let lastInteractionTime = Date.now(); 
         let speechTimeout;
 
-        // Фразы, которые она говорит сама по себе
-        const randomPhrases = [
-            "Жасмин, обними меня!",
-            "Хочу тунец в собственном соку!",
-            "Пойдем писать код?",
-            "Как дела?",
-            "Я скучала..."
-        ];
-
         // Функция показа текста в облачке
         function speak(text, duration = 3000) {
             clearTimeout(speechTimeout);
@@ -215,7 +282,7 @@
             }, duration);
         }
 
-        // Сохранение в облако Telegram (или в память браузера для тестов)
+        // Сохранение в облако Telegram
         function saveData() {
             const dataString = JSON.stringify({ hunger: stats.hunger, happiness: stats.happiness, lastInteractionTime });
             if (tg && tg.CloudStorage) {
@@ -244,10 +311,9 @@
             const now = Date.now();
             const timeSinceLastCare = (now - lastInteractionTime) / 1000;
             
-            // Если прошло время, высчитываем падение статов
             if (timeSinceLastCare > 10) {
                 const cycles = Math.floor(timeSinceLastCare / 10);
-                stats.hunger = Math.max(0, stats.hunger - (cycles * 2)); // Медленнее падает для облака
+                stats.hunger = Math.max(0, stats.hunger - (cycles * 2)); 
                 stats.happiness = Math.max(0, stats.happiness - (cycles * 1));
             }
 
@@ -266,7 +332,7 @@
                 lastInteractionTime = savedData.lastInteractionTime;
                 speak("С возвращением!");
             } else {
-                speak("Привет! Я ждала тебя!");
+                speak("Привет! Я мини жажас!");
             }
             
             checkState();
@@ -275,12 +341,6 @@
             setInterval(() => {
                 checkState();
                 saveData(); // Сохраняем каждые 10 секунд
-                
-                // С вероятностью 15% она может сказать случайную фразу, если не грустит
-                if (Math.random() < 0.15 && character.style.backgroundImage.includes('base.gif')) {
-                    const randomText = randomPhrases[Math.floor(Math.random() * randomPhrases.length)];
-                    speak(randomText);
-                }
             }, 10000);
         });
 
