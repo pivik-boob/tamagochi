@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Мини-Я Тамагочи: Взрывная версия</title>
+    <title>Мини-Жажас Тамагочи</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -62,7 +62,7 @@
             width: 25px;
             height: 25px;
             fill: var(--heart-color);
-            transition: fill 0.3s ease; /* Плавное затухание сердечек */
+            transition: fill 0.3s ease; 
         }
 
         #clean-status {
@@ -156,7 +156,6 @@
             box-shadow: 0 2px 0 rgba(0,0,0,0.5);
         }
 
-        /* Особый стиль для кнопки гидрокарбона при нажатии */
         #btn-hydrocarbon:active {
             background-color: #ffcccc;
         }
@@ -215,13 +214,14 @@
         }, { once: true });
 
         const randomPhrases = [
-            "Пожалуйста, обними меня!",
-            "Хочу киндер или рамен!",
-            "У меня появились дела :3"
+            "Быстро, обними меня!",
+            "Хочу киндер или раменчик!",
+            "Пойду займусь делами :3",
             "Я скучала..."
         ];
 
-        function speak(text, duration = 3000) {
+        // Изменили стандартное время показа текста на 5800 мс
+        function speak(text, duration = 5800) {
             clearTimeout(speechTimeout);
             speechBubble.innerText = text;
             speechBubble.style.opacity = '1';
@@ -230,13 +230,11 @@
             }, duration);
         }
 
-        // Обновление интерфейса сердечек
         function updateUI() {
             const h1 = document.getElementById('heart-1');
             const h2 = document.getElementById('heart-2');
             const h3 = document.getElementById('heart-3');
             
-            // Серые полупрозрачные сердца, если счастья не хватает
             const emptyColor = 'rgba(0, 0, 0, 0.3)';
             const fullColor = '#FF0000';
 
@@ -276,7 +274,7 @@
                 stats.happiness = Math.max(0, stats.happiness - (cycles * 1));
             }
 
-            updateUI(); // Обновляем сердечки
+            updateUI(); 
 
             if (timeSinceLastCare > 120 || stats.hunger < 30 || stats.happiness < 40) {
                 character.style.backgroundImage = "url('sad.gif')";
@@ -308,27 +306,27 @@
             }, 10000);
         });
 
-        // --- ДЕЙСТВИЯ КНОПОК ---
+        // --- ДЕЙСТВИЯ КНОПОК С НОВЫМ ТАЙМЕРОМ 5800 ---
         
         document.getElementById('btn-feed').addEventListener('click', () => {
             stats.hunger = 100;
             stats.happiness = Math.min(100, stats.happiness + 10);
             lastInteractionTime = Date.now(); 
             character.style.backgroundImage = "url('happy.gif')"; 
-            speak("Ням-ням! Вкусно! 🐟");
+            speak("Ням-ням! Вкусно! 🐟", 5800);
             updateUI();
             saveData();
-            setTimeout(checkState, 3000); 
+            setTimeout(checkState, 5800); 
         });
 
         document.getElementById('btn-kiss').addEventListener('click', () => {
             stats.happiness = 100;
             lastInteractionTime = Date.now(); 
             character.style.backgroundImage = "url('kiss.gif')"; 
-            speak("Люблю тебя! ❤️");
+            speak("Люблю тебя! ❤️", 5800);
             updateUI();
             saveData();
-            setTimeout(checkState, 2500); 
+            setTimeout(checkState, 5800); 
         });
 
         document.getElementById('btn-code').addEventListener('click', () => {
@@ -336,23 +334,20 @@
             stats.happiness = Math.min(100, stats.happiness + 5);
             lastInteractionTime = Date.now(); 
             character.style.backgroundImage = "url('code.gif')"; 
-            speak("Прохожу лабки на ТХМ 👩🏻‍💻");
+            speak("Прохожу лабки ТХМ! 👩🏻‍💻", 5800);
             updateUI();
             saveData();
-            setTimeout(checkState, 3500); 
+            setTimeout(checkState, 5800); 
         });
 
-        // НОВАЯ КНОПКА: ГИДРОКАРБОН (ВЗРЫВ)
         document.getElementById('btn-hydrocarbon').addEventListener('click', () => {
-            stats.happiness = 0; // Счастье падает до нуля, все сердца исчезают
+            stats.happiness = 0; 
             lastInteractionTime = Date.now(); 
             character.style.backgroundImage = "url('explode.gif')"; 
-            speak("БУУУУМ! бльо 💥");
-            updateUI(); // Сердечки мгновенно станут серыми
+            speak("БУУУУМ!бльо 💥", 5800);
+            updateUI(); 
             saveData();
-            
-            // Через 3 секунды проверяем состояние (она автоматически станет грустной из-за счастья = 0)
-            setTimeout(checkState, 3000); 
+            setTimeout(checkState, 5800); 
         });
 
     </script>
