@@ -165,6 +165,11 @@
     </style>
 </head>
 <body>
+<audio id="bg-music" loop>
+        <source src="music.mp3" type="audio/mpeg">
+    </audio>
+
+    <div id="screen-display">
 
 <div id="game-frame">
     <div id="screen-area">
@@ -217,7 +222,17 @@
     let stats = { hunger: 80, happiness: 80 };
     let lastInteractionTime = Date.now();
     let speechTimeout;
-    
+        // --- ДОБАВЛЯЕМ МУЗЫКУ ---
+        const bgMusic = document.getElementById('bg-music');
+        
+        // Слушаем первый клик по всему экрану, чтобы запустить музыку
+        document.body.addEventListener('click', () => {
+            if (bgMusic.paused) {
+                bgMusic.volume = 0.3; // Делаем громкость 30%, чтобы не оглушало
+                bgMusic.play().catch(e => console.log("Браузер пока блокирует звук"));
+            }
+        }, { once: true }); // { once: true } значит, что этот код сработает только 1 раз при самом первом клике
+        // -------------------------
     // Animation locks to prevent setInterval from overwriting GIFs
     let actionTimeout;
     let isAnimating = false;
