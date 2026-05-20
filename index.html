@@ -2,360 +2,358 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Мини-Я Тамагочи</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Мини-Я Тамагочи: Взрывная версия</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --bg-color: #fce4ec; 
+            --font-pixel: 'VT323', monospace;
+            --heart-color: #FF0000; 
+            --btn-text-color: #000000; 
+        }
 
         body {
-            background-color: #fce4ec;
-            background-image: url('bg.png');
-            background-size: contain;
+            background-color: var(--bg-color);
+            background-image: url('bg.png'); 
+            background-size: contain; 
             background-position: center;
             background-repeat: no-repeat;
             display: flex;
             justify-content: center;
             align-items: center;
+            height: 100vh;
+            margin: 0;
+            overflow: hidden;
+            font-family: var(--font-pixel);
+            image-rendering: pixelated; 
+        }
+
+        #screen-display {
             width: 100vw;
             height: 100vh;
-            overflow: hidden;
-            font-family: 'VT323', monospace;
-            image-rendering: pixelated;
+            position: relative; 
+            box-sizing: border-box;
+            pointer-events: none; 
         }
 
-        #game-frame {
-            position: relative;
-            width: min(100vw, calc(100vh * 9 / 16));
-            height: min(100vh, calc(100vw * 16 / 9));
-            --screen-top: 24%;
-            --screen-left: 22%;
-            --screen-width: 56%;
-            --screen-height: 57%;
-        }
-
-        #screen-area {
-            position: absolute;
-            top: var(--screen-top);
-            left: var(--screen-left);
-            width: var(--screen-width);
-            height: var(--screen-height);
-        }
-
-        /* ── Верхняя панель: сердечки + CLEAN ── */
         #top-bar {
             position: absolute;
-            top: 4%;
-            left: 4%;
-            right: 4%;
+            top: 25%; 
+            left: 30%; 
             display: flex;
-            justify-content: space-between;
+            justify-content: flex-start;
             align-items: center;
+            gap: 10px;
+            height: 30px;
+            z-index: 2;
+            pointer-events: auto; 
         }
 
         #hearts-container {
             display: flex;
-            gap: 4px;
+            gap: 5px;
         }
-
+        
         .heart {
-            width: 22px;
-            height: 22px;
-            fill: #FF0000;
-            filter: drop-shadow(0 1px 0 #000);
-        }
-
-        .heart.empty {
-            fill: #555;
-            opacity: 0.4;
+            width: 25px;
+            height: 25px;
+            fill: var(--heart-color);
+            transition: fill 0.3s ease; /* Плавное затухание сердечек */
         }
 
         #clean-status {
-            color: #00FF00;
-            font-size: 22px;
-            text-shadow: 1px 1px 0 #003300;
+            color: #00FF00; 
+            font-size: 24px;
+            position: absolute;
+            right: -150%; 
+        }
+        
+        #main-character-container {
+            position: absolute;
+            top: 30%; 
+            left: 50%;
+            transform: translateX(-50%); 
+            width: 150px;
+            height: 250px;
+            z-index: 1; 
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 0;
+            box-sizing: border-box;
+            pointer-events: auto;
         }
 
-        /* ── Облачко с текстом ── */
         #speech-bubble {
             position: absolute;
-            top: 2%;
-            left: 50%;
-            transform: translateX(-50%);
+            top: -30px; 
             background: white;
             border: 2px solid black;
             border-radius: 10px;
-            padding: 4px 14px;
-            font-size: 16px;
+            padding: 5px 12px;
+            font-size: 18px;
             color: black;
             white-space: nowrap;
-            opacity: 0;
+            opacity: 0; 
             transition: opacity 0.3s ease;
-            box-shadow: 0 3px 0 rgba(0,0,0,0.25);
+            box-shadow: 0 4px 0 rgba(0,0,0,0.2);
             pointer-events: none;
             z-index: 10;
         }
-
+        
         #speech-bubble::after {
             content: '';
             position: absolute;
-            bottom: -9px;
+            bottom: -8px;
             left: 50%;
             transform: translateX(-50%);
-            border-width: 9px 7px 0;
+            border-width: 8px 8px 0;
             border-style: solid;
-            border-color: black transparent transparent;
+            border-color: black transparent transparent transparent;
         }
-
-        /* ── Персонаж ── */
-        #main-character-container {
-            position: absolute;
-            /* Moved up slightly to accommodate the larger size */
-            top: 10%; 
-            left: 50%;
-            transform: translateX(-50%);
-            /* Increased dimensions to make the GIF larger */
-            width: 85%;      
-            height: 75%;     
-            display: flex;
-            justify-content: center;
-            align-items: flex-end;
-        }
-
+        
         #main-character {
             width: 100%;
             height: 100%;
-            background-image: url('base.gif');
+            background-image: url('base.gif'); 
             background-size: contain;
             background-repeat: no-repeat;
-            background-position: center bottom;
-            image-rendering: pixelated;
+            background-position: center;
         }
-
-        /* ── Кнопки FEED / KISS ── */
+        
         #action-bar {
             position: absolute;
-            bottom: 4%;
+            top: 65%; 
             left: 50%;
-            transform: translateX(-50%);
+            transform: translateX(-50%); 
             display: flex;
-            gap: 12px;
-            z-index: 5;
+            flex-wrap: wrap; 
+            justify-content: center;
+            width: 280px; 
+            gap: 8px; 
+            z-index: 3;
+            pointer-events: auto; 
         }
-
+        
         .action-btn {
-            background-color: white;
-            color: #000;
-            font-family: 'VT323', monospace;
-            font-size: 20px;
-            padding: 6px 18px;
-            border-radius: 6px;
-            border: 2px solid #000;
-            box-shadow: 0 4px 0 rgba(0,0,0,0.45);
+            background-color: white; 
+            color: var(--btn-text-color);
+            font-size: 17px; 
+            padding: 6px 12px; 
+            border-radius: 8px;
+            border: 2px solid #000; 
+            box-shadow: 0 4px 0 rgba(0,0,0,0.5); 
             cursor: pointer;
-            user-select: none;
-            transition: transform 0.1s, box-shadow 0.1s;
+            transition: transform 0.1s, box-shadow 0.1s, background-color 0.2s;
+        }
+        
+        .action-btn:active {
+            transform: translateY(2px);
+            box-shadow: 0 2px 0 rgba(0,0,0,0.5);
         }
 
-        .action-btn:active {
-            transform: translateY(3px);
-            box-shadow: 0 1px 0 rgba(0,0,0,0.45);
+        /* Особый стиль для кнопки гидрокарбона при нажатии */
+        #btn-hydrocarbon:active {
+            background-color: #ffcccc;
         }
+
     </style>
 </head>
 <body>
-<audio id="bg-music" loop>
+
+    <audio id="bg-music" loop>
         <source src="music.mp3" type="audio/mpeg">
     </audio>
 
     <div id="screen-display">
-
-<div id="game-frame">
-    <div id="screen-area">
-
-        <!-- Верхняя панель -->
         <div id="top-bar">
             <div id="hearts-container">
-                <svg class="heart" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
-                <svg class="heart" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
-                <svg class="heart" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
-                <svg class="heart empty" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
-                <svg class="heart empty" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+                <svg class="heart" id="heart-1" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+                <svg class="heart" id="heart-2" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+                <svg class="heart" id="heart-3" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
             </div>
             <div id="clean-status">CLEAN</div>
         </div>
-
-        <!-- Облачко -->
-        <div id="speech-bubble">Привет!</div>
-
-        <!-- Персонаж -->
+        
         <div id="main-character-container">
+            <div id="speech-bubble">Привет!</div>
             <div id="main-character"></div>
         </div>
-
-        <!-- Кнопки -->
+        
         <div id="action-bar">
             <div class="action-btn" id="btn-feed">FEED</div>
             <div class="action-btn" id="btn-kiss">KISS</div>
+            <div class="action-btn" id="btn-code">CODE</div>
+            <div class="action-btn" id="btn-hydrocarbon">HYDROCARBON</div>
         </div>
-
     </div>
-</div>
 
-<script>
-    const tg = window.Telegram?.WebApp;
-    if (tg) { tg.expand(); tg.ready(); }
+    <script>
+        const tg = window.Telegram?.WebApp;
+        if (tg) {
+            tg.expand();
+            tg.ready();
+        }
 
-    // Preload GIFs so they display instantly on click without network delay
-    const preloadImages = ['happy.gif', 'kiss.gif', 'sad.gif'];
-    preloadImages.forEach(src => {
-        const img = new Image();
-        img.src = src;
-    });
+        const character = document.getElementById('main-character');
+        const speechBubble = document.getElementById('speech-bubble');
+        
+        let stats = { hunger: 50, happiness: 50 };
+        let lastInteractionTime = Date.now(); 
+        let speechTimeout;
 
-    const character   = document.getElementById('main-character');
-    const speechBubble = document.getElementById('speech-bubble');
-    const heartsEl    = document.getElementById('hearts-container');
-    const cleanEl     = document.getElementById('clean-status');
-
-    let stats = { hunger: 80, happiness: 80 };
-    let lastInteractionTime = Date.now();
-    let speechTimeout;
-        // --- ДОБАВЛЯЕМ МУЗЫКУ ---
         const bgMusic = document.getElementById('bg-music');
-        
-        // Слушаем первый клик по всему экрану, чтобы запустить музыку
         document.body.addEventListener('click', () => {
-            if (bgMusic.paused) {
-                bgMusic.volume = 0.3; // Делаем громкость 30%, чтобы не оглушало
-                bgMusic.play().catch(e => console.log("Браузер пока блокирует звук"));
+            if (bgMusic && bgMusic.paused) {
+                bgMusic.volume = 0.3; 
+                bgMusic.play().catch(e => console.log("Ждем взаимодействия"));
             }
-        }, { once: true }); // { once: true } значит, что этот код сработает только 1 раз при самом первом клике
-        // -------------------------
-    // Animation locks to prevent setInterval from overwriting GIFs
-    let actionTimeout;
-    let isAnimating = false;
+        }, { once: true });
 
-    const randomPhrases = [
-        "Скучаю по тебе!",
-        "Хочу кушать...",
-        "Обними меня!",
-        "Люблю тебя ❤️",
-        "Побудь со мной?"
-    ];
+        const randomPhrases = [
+            "Жасмин, обними меня!",
+            "Хочу тунец в собственном соку!",
+            "Я скучала..."
+        ];
 
-    /* ── Облачко ── */
-    function speak(text, duration = 3000) {
-        clearTimeout(speechTimeout);
-        speechBubble.innerText = text;
-        speechBubble.style.opacity = '1';
-        speechTimeout = setTimeout(() => { speechBubble.style.opacity = '0'; }, duration);
-    }
+        function speak(text, duration = 3000) {
+            clearTimeout(speechTimeout);
+            speechBubble.innerText = text;
+            speechBubble.style.opacity = '1';
+            speechTimeout = setTimeout(() => {
+                speechBubble.style.opacity = '0';
+            }, duration);
+        }
 
-    /* ── Сердечки (0–5) ── */
-    function updateHearts(value) {
-        const filled = Math.round((value / 100) * 5);
-        const hearts = heartsEl.querySelectorAll('.heart');
-        hearts.forEach((h, i) => {
-            h.classList.toggle('empty', i >= filled);
+        // Обновление интерфейса сердечек
+        function updateUI() {
+            const h1 = document.getElementById('heart-1');
+            const h2 = document.getElementById('heart-2');
+            const h3 = document.getElementById('heart-3');
+            
+            // Серые полупрозрачные сердца, если счастья не хватает
+            const emptyColor = 'rgba(0, 0, 0, 0.3)';
+            const fullColor = '#FF0000';
+
+            h1.style.fill = stats.happiness > 10 ? fullColor : emptyColor;
+            h2.style.fill = stats.happiness > 40 ? fullColor : emptyColor;
+            h3.style.fill = stats.happiness > 70 ? fullColor : emptyColor;
+        }
+
+        function saveData() {
+            const dataString = JSON.stringify({ hunger: stats.hunger, happiness: stats.happiness, lastInteractionTime });
+            if (tg && tg.CloudStorage) {
+                tg.CloudStorage.setItem('tamagotchi_data', dataString, (err, success) => {});
+            } else {
+                localStorage.setItem('tamagotchi_data', dataString);
+            }
+        }
+
+        function loadData(callback) {
+            if (tg && tg.CloudStorage) {
+                tg.CloudStorage.getItem('tamagotchi_data', (err, value) => {
+                    if (!err && value) callback(JSON.parse(value));
+                    else callback(null);
+                });
+            } else {
+                const value = localStorage.getItem('tamagotchi_data');
+                callback(value ? JSON.parse(value) : null);
+            }
+        }
+
+        function checkState() {
+            const now = Date.now();
+            const timeSinceLastCare = (now - lastInteractionTime) / 1000;
+            
+            if (timeSinceLastCare > 10) {
+                const cycles = Math.floor(timeSinceLastCare / 10);
+                stats.hunger = Math.max(0, stats.hunger - (cycles * 2)); 
+                stats.happiness = Math.max(0, stats.happiness - (cycles * 1));
+            }
+
+            updateUI(); // Обновляем сердечки
+
+            if (timeSinceLastCare > 120 || stats.hunger < 30 || stats.happiness < 40) {
+                character.style.backgroundImage = "url('sad.gif')";
+            } else {
+                character.style.backgroundImage = "url('base.gif')";
+            }
+        }
+
+        loadData((savedData) => {
+            if (savedData) {
+                stats.hunger = savedData.hunger;
+                stats.happiness = savedData.happiness;
+                lastInteractionTime = savedData.lastInteractionTime;
+                speak("С возвращением!");
+            } else {
+                speak("Привет! Я мини жажас!");
+            }
+            
+            checkState();
+
+            setInterval(() => {
+                checkState();
+                saveData(); 
+                
+                if (Math.random() < 0.15 && character.style.backgroundImage.includes('base.gif')) {
+                    const randomText = randomPhrases[Math.floor(Math.random() * randomPhrases.length)];
+                    speak(randomText);
+                }
+            }, 10000);
         });
-    }
 
-    /* ── Состояние персонажа ── */
-    function checkState() {
-        const now = Date.now();
-        const elapsed = (now - lastInteractionTime) / 1000;
-
-        if (elapsed > 10) {
-            const cycles = Math.floor(elapsed / 10);
-            stats.hunger    = Math.max(0, stats.hunger    - cycles * 2);
-            stats.happiness = Math.max(0, stats.happiness - cycles * 1);
-        }
-
-        updateHearts(stats.happiness);
-        cleanEl.style.color = stats.hunger > 30 ? '#00FF00' : '#FF4444';
-
-        // Only update the background image if an animation isn't currently playing
-        if (!isAnimating) {
-            const isSad = elapsed > 120 || stats.hunger < 30 || stats.happiness < 40;
-            character.style.backgroundImage = isSad ? "url('sad.gif')" : "url('base.gif')";
-        }
-    }
-
-    /* ── Сохранение / загрузка ── */
-    function saveData() {
-        const data = JSON.stringify({ hunger: stats.hunger, happiness: stats.happiness, lastInteractionTime });
-        if (tg?.CloudStorage) {
-            tg.CloudStorage.setItem('tamagotchi_data', data, err => { if (err) console.error(err); });
-        } else {
-            localStorage.setItem('tamagotchi_data', data);
-        }
-    }
-
-    function loadData(cb) {
-        if (tg?.CloudStorage) {
-            tg.CloudStorage.getItem('tamagotchi_data', (err, val) => cb(!err && val ? JSON.parse(val) : null));
-        } else {
-            const val = localStorage.getItem('tamagotchi_data');
-            cb(val ? JSON.parse(val) : null);
-        }
-    }
-
-    /* ── Инициализация ── */
-    loadData(saved => {
-        if (saved) {
-            stats.hunger            = saved.hunger;
-            stats.happiness         = saved.happiness;
-            lastInteractionTime     = saved.lastInteractionTime;
-            speak('С возвращением! 💕');
-        } else {
-            speak('Привет! Ухаживай за мной! 💕');
-        }
-        checkState();
-
-        setInterval(() => {
-            checkState();
+        // --- ДЕЙСТВИЯ КНОПОК ---
+        
+        document.getElementById('btn-feed').addEventListener('click', () => {
+            stats.hunger = 100;
+            stats.happiness = Math.min(100, stats.happiness + 10);
+            lastInteractionTime = Date.now(); 
+            character.style.backgroundImage = "url('happy.gif')"; 
+            speak("Ням-ням! Вкусно! 🐟");
+            updateUI();
             saveData();
-            if (Math.random() < 0.15 && !character.style.backgroundImage.includes('sad')) {
-                speak(randomPhrases[Math.floor(Math.random() * randomPhrases.length)]);
-            }
-        }, 10000);
-    });
+            setTimeout(checkState, 3000); 
+        });
 
-    /* ── Кнопки ── */
-    document.getElementById('btn-feed').addEventListener('click', () => {
-        stats.hunger    = 100;
-        stats.happiness = Math.min(100, stats.happiness + 10);
-        lastInteractionTime = Date.now();
-        
-        isAnimating = true;
-        character.style.backgroundImage = "url('happy.gif')";
-        speak('Ням-ням! Вкусно! 🍓');
-        saveData();
-        
-        clearTimeout(actionTimeout);
-        actionTimeout = setTimeout(() => {
-            isAnimating = false;
-            checkState();
-        }, 3000);
-    });
+        document.getElementById('btn-kiss').addEventListener('click', () => {
+            stats.happiness = 100;
+            lastInteractionTime = Date.now(); 
+            character.style.backgroundImage = "url('kiss.gif')"; 
+            speak("Люблю тебя! ❤️");
+            updateUI();
+            saveData();
+            setTimeout(checkState, 2500); 
+        });
 
-    document.getElementById('btn-kiss').addEventListener('click', () => {
-        stats.happiness = 100;
-        lastInteractionTime = Date.now();
-        
-        isAnimating = true;
-        character.style.backgroundImage = "url('kiss.gif')";
-        speak('Люблю тебя! ❤️');
-        saveData();
-        
-        clearTimeout(actionTimeout);
-        actionTimeout = setTimeout(() => {
-            isAnimating = false;
-            checkState();
-        }, 2500);
-    });
-</script>
+        document.getElementById('btn-code').addEventListener('click', () => {
+            stats.hunger = Math.max(0, stats.hunger - 15); 
+            stats.happiness = Math.min(100, stats.happiness + 5);
+            lastInteractionTime = Date.now(); 
+            character.style.backgroundImage = "url('code.gif')"; 
+            speak("Прохожу лабки на ТХМ 👩🏻‍💻");
+            updateUI();
+            saveData();
+            setTimeout(checkState, 3500); 
+        });
+
+        // НОВАЯ КНОПКА: ГИДРОКАРБОН (ВЗРЫВ)
+        document.getElementById('btn-hydrocarbon').addEventListener('click', () => {
+            stats.happiness = 0; // Счастье падает до нуля, все сердца исчезают
+            lastInteractionTime = Date.now(); 
+            character.style.backgroundImage = "url('explode.gif')"; 
+            speak("БУУУУМ! бльо 💥");
+            updateUI(); // Сердечки мгновенно станут серыми
+            saveData();
+            
+            // Через 3 секунды проверяем состояние (она автоматически станет грустной из-за счастья = 0)
+            setTimeout(checkState, 3000); 
+        });
+
+    </script>
 </body>
 </html>
